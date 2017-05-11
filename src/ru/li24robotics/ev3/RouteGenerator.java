@@ -27,6 +27,25 @@ public class RouteGenerator
         this.cubeCountTake = cubeCountTake;
     }
 
+    public void generate()
+    {
+        getCubesCors();
+        getCubeCollection(1, new ArrayList<int[]>());
+        parseAllRoute();
+    }
+
+    private void parseAllRoute()
+    {
+        for(int i = 0; i < mainLab.size(); i++)
+        {
+            for(int j = 0; j < mainLab.get(i).size(); j++)
+            {
+                Route now = getOptimalRouteForItem(new int[] {i, j}, endItemCors);
+                parseRouteToFile(now, "[" + i + "][" + j + "].route");
+            }
+        }
+    }
+
     private void parseRouteToFile(Route route, String nameRouteFile)
     {
         try {
@@ -40,8 +59,39 @@ public class RouteGenerator
         }
     }
 
+    private Route getOptimalRouteForItem(int[] corItem, int[] corEndRoute)
+    {
+        Route _nowAnsRoute = null;
+        for(int i = 0; i < cubeCollection.size() - 1; i++)
+        {
+            Route _nowIterationRoute;
+            _nowIterationRoute = getRouteFromTwoPoints(corItem, cubeCollection.get(i).get(0));
+            for(int j = 0; j < cubeCollection.get(i).size(); j++)
+            {
+                ArrayList<RouteIteration> _nowRouteIterationList = _nowIterationRoute.getRouteList();
+                _nowRouteIterationList.addAll(getOptimalRouteForItem(cubeCollection.get(i).get(j),
+                        cubeCollection.get(i).get(j + 1)).getRouteList());
+                _nowIterationRoute = new Route(_nowRouteIterationList);
+            }
+            ArrayList<RouteIteration> _nowRouteIterationList = _nowIterationRoute.getRouteList();
+            _nowRouteIterationList.addAll(getOptimalRouteForItem(cubeCollection.get(i).get(cubeCollection.get(i).size() - 1),
+                    corEndRoute).getRouteList());
+            _nowIterationRoute = new Route(_nowRouteIterationList);
+            if(i == 0)
+            {
+                _nowAnsRoute = _nowIterationRoute;
+                continue;
+            }
+            if(_nowAnsRoute.getRouteSize() > _nowIterationRoute.getRouteSize())
+            {
+                _nowAnsRoute = _nowIterationRoute;
+            }
+        }
+        return _nowAnsRoute;
+    }
+
     ArrayList<ArrayList<int[]>> cubeCollection;
-    private void getCubeCollections(int step, ArrayList<int[]> usedCubes)
+    private void getCubeCollection(int step, ArrayList<int[]> usedCubes)
     {
         if(step - 1 == cubeCountTake)
         {
@@ -50,18 +100,18 @@ public class RouteGenerator
         }
         for(int i = 0; i < cubeCors.size(); i++)
         {
-            boolean isAdd = true;
+            boolean _isAdd = true;
             for(int j = 0; j < usedCubes.size(); j++)
             {
                 if(usedCubes.get(j).equals(cubeCors.get(i)))
                 {
-                    isAdd = false;
+                    _isAdd = false;
                 }
             }
-            if(isAdd)
+            if(_isAdd)
             {
                 usedCubes.add(cubeCors.get(i));
-                getCubeCollections(step + 1, usedCubes);
+                getCubeCollection(step + 1, usedCubes);
                 usedCubes.remove(usedCubes.size() - 1);
             }
         }
