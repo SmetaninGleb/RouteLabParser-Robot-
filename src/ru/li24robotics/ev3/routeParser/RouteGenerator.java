@@ -1,4 +1,4 @@
-package ru.li24robotics.ev3;
+package ru.li24robotics.ev3.routeParser;
 
 
 import ru.li24robotics.ev3.robolab.cubeFinder.Route;
@@ -19,12 +19,16 @@ public class RouteGenerator
     private int cubeCountTake;
     private int[] endItemCors;
     private ArrayList<int[]> cubeCors;
+    private ArrayList<ArrayList<int[]>> cubeCollection;
+
 
     public RouteGenerator(ArrayList<ArrayList<LabItem>> mainLab, int [] endItemCors, int cubeCountTake)
     {
         this.mainLab = mainLab;
         this.endItemCors = endItemCors;
         this.cubeCountTake = cubeCountTake;
+        this.cubeCors = new ArrayList<int[]>();
+        this.cubeCollection = new ArrayList<ArrayList<int[]>>();
     }
 
     public void generate()
@@ -90,12 +94,11 @@ public class RouteGenerator
         return _nowAnsRoute;
     }
 
-    ArrayList<ArrayList<int[]>> cubeCollection;
     private void getCubeCollection(int step, ArrayList<int[]> usedCubes)
     {
         if(step - 1 == cubeCountTake)
         {
-            cubeCollection.add(usedCubes);
+            cubeCollection.add(( ArrayList<int[]>)usedCubes.clone());
             return;
         }
         for(int i = 0; i < cubeCors.size(); i++)

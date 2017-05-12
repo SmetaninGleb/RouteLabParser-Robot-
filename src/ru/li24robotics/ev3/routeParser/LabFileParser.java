@@ -1,4 +1,4 @@
-package ru.li24robotics.ev3;
+package ru.li24robotics.ev3.routeParser;
 
 
 import ru.li24robotics.ev3.robolab.lab.LabItem;
@@ -11,7 +11,8 @@ public class LabFileParser {
     private FileInputStream fileInputStream;
     private ObjectInputStream objectInputStream;
 
-    public LabFileParser() {
+    public LabFileParser()
+    {
         try {
             fileInputStream = new FileInputStream("MainLab.out");
             objectInputStream = new ObjectInputStream(fileInputStream);
@@ -20,7 +21,8 @@ public class LabFileParser {
         }
     }
 
-    public ArrayList<ArrayList<LabItem>> getMainLab() {
+    public ArrayList<ArrayList<LabItem>> getMainLab()
+    {
         ArrayList<ArrayList<LabItem>> mainLab;
         try
         {
