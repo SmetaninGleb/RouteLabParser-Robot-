@@ -7,9 +7,7 @@ import ru.li24robotics.ev3.robolab.lab.LabItem;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 public class RouteGenerator
 {
@@ -66,19 +64,19 @@ public class RouteGenerator
     private Route getOptimalRouteForItem(int[] corItem, int[] corEndRoute)
     {
         Route _nowAnsRoute = null;
-        for(int i = 0; i < cubeCollection.size() - 1; i++)
+        for(int i = 0; i < cubeCollection.size(); i++)
         {
             Route _nowIterationRoute;
             _nowIterationRoute = getRouteFromTwoPoints(corItem, cubeCollection.get(i).get(0));
-            for(int j = 0; j < cubeCollection.get(i).size(); j++)
+            for(int j = 0; j < cubeCollection.get(i).size() - 1; j++)
             {
                 ArrayList<RouteIteration> _nowRouteIterationList = _nowIterationRoute.getRouteList();
-                _nowRouteIterationList.addAll(getOptimalRouteForItem(cubeCollection.get(i).get(j),
+                _nowRouteIterationList.addAll(getRouteFromTwoPoints(cubeCollection.get(i).get(j),
                         cubeCollection.get(i).get(j + 1)).getRouteList());
                 _nowIterationRoute = new Route(_nowRouteIterationList);
             }
             ArrayList<RouteIteration> _nowRouteIterationList = _nowIterationRoute.getRouteList();
-            _nowRouteIterationList.addAll(getOptimalRouteForItem(cubeCollection.get(i).get(cubeCollection.get(i).size() - 1),
+            _nowRouteIterationList.addAll(getRouteFromTwoPoints(cubeCollection.get(i).get(cubeCollection.get(i).size() - 1),
                     corEndRoute).getRouteList());
             _nowIterationRoute = new Route(_nowRouteIterationList);
             if(i == 0)
@@ -134,37 +132,38 @@ public class RouteGenerator
                 _parent.get(i).add(j, new int[] {0, 0});
             }
         }
-        Queue<int []> _bfsQueue = new PriorityQueue<int[]>();
+        Queue<int []> _bfsQueue = new LinkedList<int[]>();
         _bfsQueue.add(startCors);
+        _used.get(startCors[0]).set(startCors[1], 1);
         while (!_bfsQueue.isEmpty())
         {
-            if(_bfsQueue.element().equals(endCors))
+            if(Arrays.equals(_bfsQueue.element(), endCors))
             {
                 break;
             }
-            int [] _now = _bfsQueue.remove();
-            if(_now[0] != 0 && !mainLab.get(_now[0]).get(_now[1]).toLeft.isWallIsHere()
+            int [] _now = _bfsQueue.poll();
+            if(_now[0] > 0 && !mainLab.get(_now[0]).get(_now[1]).toLeft.isWallIsHere()
                     && _used.get(_now[0] - 1).get(_now[1]) != 1)
             {
                 _bfsQueue.add(new int[] {_now[0] - 1, _now[1]});
                 _used.get(_now[0] - 1).set(_now[1], 1);
                 _parent.get(_now[0] - 1).set(_now[1], _now);
             }
-            if(_now[0] != mainLab.size() - 1 && !mainLab.get(_now[0]).get(_now[1]).toRight.isWallIsHere()
+            if(_now[0] < mainLab.size() - 1 && !mainLab.get(_now[0]).get(_now[1]).toRight.isWallIsHere()
                     && _used.get(_now[0] + 1).get(_now[1]) != 1)
             {
                 _bfsQueue.add(new int[] {_now[0] + 1, _now[1]});
                 _used.get(_now[0] + 1).set(_now[1], 1);
                 _parent.get(_now[0] + 1).set(_now[1], _now);
             }
-            if(_now[1] != 0 && !mainLab.get(_now[0]).get(_now[1]).toBack.isWallIsHere()
+            if(_now[1] > 0 && !mainLab.get(_now[0]).get(_now[1]).toBack.isWallIsHere()
                     && _used.get(_now[0]).get(_now[1] - 1) != 1)
             {
                 _bfsQueue.add(new int[] {_now[0], _now[1] - 1});
                 _used.get(_now[0]).set(_now[1] - 1, 1);
                 _parent.get(_now[0]).set(_now[1] - 1, _now);
             }
-            if(_now[1] != mainLab.get(_now[0]).size() - 1 && !mainLab.get(_now[0]).get(_now[1]).toForward.isWallIsHere()
+            if(_now[1] < mainLab.get(_now[0]).size() - 1 && !mainLab.get(_now[0]).get(_now[1]).toForward.isWallIsHere()
                     && _used.get(_now[0]).get(_now[1] + 1) != 1)
             {
                 _bfsQueue.add(new int[] {_now[0], _now[1] + 1});
@@ -172,34 +171,42 @@ public class RouteGenerator
                 _parent.get(_now[0]).set(_now[1] + 1, _now);
             }
         }
-        if(_bfsQueue.isEmpty() || (!_bfsQueue.isEmpty() && !_bfsQueue.element().equals(endCors)))
+        if(_bfsQueue.isEmpty() || (!_bfsQueue.isEmpty() && !Arrays.equals(_bfsQueue.element(), endCors)))
         {
             return null;
         }
         Route _nowRoute = new Route();
 
-        int [] _nowScanParent = endCors;
-        while(!_nowScanParent.equals(startCors))
+        int [] _nowScanParent = endCors.clone();
+        while(!Arrays.equals(_nowScanParent, startCors))
         {
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[0] == _nowScanParent[0] - 1)
             {
                 RouteIteration _nowIteration = new RouteIteration("ToRight", 1);
                 _nowRoute.addRouteIterationToStart(_nowIteration);
+                _nowScanParent[0] -= 1;
+                continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[0] == _nowScanParent[0] + 1)
             {
                 RouteIteration _nowIteration = new RouteIteration("ToLeft", 1);
                 _nowRoute.addRouteIterationToStart(_nowIteration);
+                _nowScanParent[0] += 1;
+                continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[1] == _nowScanParent[1] - 1)
             {
                 RouteIteration _nowIteration = new RouteIteration("Forward", 1);
                 _nowRoute.addRouteIterationToStart(_nowIteration);
+                _nowScanParent[1] -= 1;
+                continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[1] == _nowScanParent[1] + 1)
             {
                 RouteIteration _nowIteration = new RouteIteration("Backward", 1);
                 _nowRoute.addRouteIterationToStart(_nowIteration);
+                _nowScanParent[1] += 1;
+                continue;
             }
         }
         return _nowRoute;
