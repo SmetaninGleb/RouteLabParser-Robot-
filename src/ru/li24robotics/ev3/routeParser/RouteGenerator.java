@@ -68,6 +68,10 @@ public class RouteGenerator
         {
             Route _nowIterationRoute;
             _nowIterationRoute = getRouteFromTwoPoints(corItem, cubeCollection.get(i).get(0));
+            if(_nowIterationRoute == null)
+            {
+                continue;
+            }
             for(int j = 0; j < cubeCollection.get(i).size() - 1; j++)
             {
                 ArrayList<RouteIteration> _nowRouteIterationList = _nowIterationRoute.getRouteList();
