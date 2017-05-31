@@ -178,34 +178,67 @@ public class RouteGenerator
         Route _nowRoute = new Route();
 
         int [] _nowScanParent = endCors.clone();
+        String _previousType = "";
         while(!Arrays.equals(_nowScanParent, startCors))
         {
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[0] == _nowScanParent[0] - 1)
             {
-                RouteIteration _nowIteration = new RouteIteration("ToRight", 1);
-                _nowRoute.addRouteIterationToStart(_nowIteration);
+                if(_previousType == "ToRight")
+                {
+                    _nowRoute.getRouteList().get(0).setValue
+                            (_nowRoute.getRouteList().get(0).getValue() + 1);
+                }
+                else {
+                    RouteIteration _nowIteration = new RouteIteration("ToRight", 1);
+                    _nowRoute.addRouteIterationToStart(_nowIteration);
+                }
                 _nowScanParent[0] -= 1;
+                _previousType = "ToRight";
                 continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[0] == _nowScanParent[0] + 1)
             {
-                RouteIteration _nowIteration = new RouteIteration("ToLeft", 1);
-                _nowRoute.addRouteIterationToStart(_nowIteration);
+                if(_previousType == "ToLeft")
+                {
+                    _nowRoute.getRouteList().get(0).setValue
+                            (_nowRoute.getRouteList().get(0).getValue() + 1);
+                }
+                else {
+                    RouteIteration _nowIteration = new RouteIteration("ToLeft", 1);
+                    _nowRoute.addRouteIterationToStart(_nowIteration);
+                }
                 _nowScanParent[0] += 1;
+                _previousType = "ToLeft";
                 continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[1] == _nowScanParent[1] - 1)
             {
-                RouteIteration _nowIteration = new RouteIteration("Forward", 1);
-                _nowRoute.addRouteIterationToStart(_nowIteration);
+                if(_previousType == "Forward")
+                {
+                    _nowRoute.getRouteList().get(0).setValue
+                            (_nowRoute.getRouteList().get(0).getValue() + 1);
+                }
+                else {
+                    RouteIteration _nowIteration = new RouteIteration("Forward", 1);
+                    _nowRoute.addRouteIterationToStart(_nowIteration);
+                }
                 _nowScanParent[1] -= 1;
+                _previousType = "Forward";
                 continue;
             }
             if(_parent.get(_nowScanParent[0]).get(_nowScanParent[1])[1] == _nowScanParent[1] + 1)
             {
-                RouteIteration _nowIteration = new RouteIteration("Backward", 1);
-                _nowRoute.addRouteIterationToStart(_nowIteration);
+                if(_previousType == "Backward")
+                {
+                    _nowRoute.getRouteList().get(0).setValue
+                            (_nowRoute.getRouteList().get(0).getValue() + 1);
+                }
+                else {
+                    RouteIteration _nowIteration = new RouteIteration("Backward", 1);
+                    _nowRoute.addRouteIterationToStart(_nowIteration);
+                }
                 _nowScanParent[1] += 1;
+                _previousType = "Backward";
                 continue;
             }
         }
